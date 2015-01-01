@@ -1,0 +1,16 @@
+﻿
+    <form ng-submit="login()" role="form" class="form-inline">
+
+
+        <div class="form-group">
+            <label for="email">Email address:</label>
+            <input type="text" name="username" placeholder="username" ng-model="credentials.username" required />
+        </div>
+        <div class="form-group">
+            <label for="pwd">Password:</label>
+            <input type="password" name="password" placeholder="password" ng-model="credentials.password" required />
+        </div>
+
+        <button type="submit" class="btn btn-default">Submit</button>
+    </form>
+
