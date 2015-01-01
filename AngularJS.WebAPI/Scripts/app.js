@@ -49,7 +49,7 @@ app.factory("SessionService", function () {
 
         },
         set: function (key, val) {
-            return sessionStorage.setItem(key, value);
+            return sessionStorage.setItem(key, val);
         },
         unset: function (key) {
             return sessionStorage.removeItem(key);
@@ -69,11 +69,13 @@ app.factory("AuthenticationService", function ($location, $http, SessionService)
         login: function (credentials) {
             var login = $http.post("/auth/Login", credentials);
             login.success(cacheSesion);
+            return login;
         },
         logout: function () {
             // $location.path('/login');
             var logout = $http.get('/auth/LogOut');
             logout.success(uncacheSession);
+            return logout;
         },
         isLoggedIn: function () {
             return SessionService.get('auth');

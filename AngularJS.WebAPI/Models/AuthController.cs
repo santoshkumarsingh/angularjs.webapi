@@ -26,12 +26,10 @@ namespace AngularJS.WebAPI.Models
             return Newtonsoft.Json.JsonConvert.SerializeObject(result);
         }
         [Route("Auth/LogOut")]
-        public string LogOut(Credentials cred)
+        [HttpGet]
+        public string LogOut()
         {
-
-            var r = db.Credentials.Select(x => x.UserName.Equals(cred.UserName) && x.Password.Equals(cred.Password)).Count() == 1;
-            var result = new { Result = r };
-            return Newtonsoft.Json.JsonConvert.SerializeObject(result);
+            return string.Empty;
         }
         // GET api/Auth
         public IQueryable<Credentials> GetCredentials()
