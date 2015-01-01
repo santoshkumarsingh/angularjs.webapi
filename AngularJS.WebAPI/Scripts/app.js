@@ -1,4 +1,4 @@
-﻿var app = angular.module("app", ['ngRoute'])
+﻿var app = angular.module("app", ['ngRoute']);
 
 app.config(function ($routeProvider) {
 
@@ -12,41 +12,102 @@ app.config(function ($routeProvider) {
         controller: 'HomeController'
     });
 
-    $routeProvider.otherwise({ redirectTo: '/login' });
+    $routeProvider.otherwise({
+        redirectTo: '/login'
+    });
 
 });
 
-app.factory("AuthenticationService", function ($location) {
+app.run(function ($rootScope, $location, AuthenticationService) {
+
+    var sAuth = ['/home'];
+    $rootScope.$on('$routeChangeStart', function (event, next, current) {
+        if (_(sAuth).contains($location.path()) && !AuthenticationService.isLoggedIn()) {
+            $location.path('/login');
+        }
+    });
+});
+
+//app.factory("AuthenticationService", function ($location) {
+//    return {
+//        login: function (credentials) {
+//            if (credentials.username !== "test" || credentials.password !== "test") {
+//                alert("Username must be 'ralph', password must be 'wiggum'");
+//            } else {
+//                $location.path('/home');
+//            }
+//        },
+//        logout: function () {
+//            $location.path('/login');
+//        }
+//    };
+//});
+app.factory("SessionService", function () {
+    return {
+        get: function (key) {
+            return sessionStorage.getItem(key);
+
+        },
+        set: function (key, val) {
+            return sessionStorage.setItem(key, value);
+        },
+        unset: function (key) {
+            return sessionStorage.removeItem(key);
+        }
+
+    };
+});
+app.factory("AuthenticationService", function ($location, $http, SessionService) {
+    var cacheSesion = function () {
+        SessionService.set('auth', true);
+    };
+    var uncacheSession = function () {
+        SessionService.unset('auth');
+
+    };
     return {
         login: function (credentials) {
-            if (credentials.username !== "test" || credentials.password !== "test") {
-                alert("Username must be 'ralph', password must be 'wiggum'");
-            } else {
-                $location.path('/home');
-            }
+            var login = $http.post("/auth/Login", credentials);
+            login.success(cacheSesion);
         },
         logout: function () {
-            $location.path('/login');
+            // $location.path('/login');
+            var logout = $http.get('/auth/LogOut');
+            logout.success(uncacheSession);
+        },
+        isLoggedIn: function () {
+            return SessionService.get('auth');
         }
     };
 });
 
 app.controller("LoginController", function ($scope, $location, AuthenticationService) {
-    $scope.credentials = { username: "", password: "" };
+    $scope.credentials = {
+        username: "",
+        password: ""
+    };
 
     $scope.login = function () {
-        AuthenticationService.login($scope.credentials);
-    }
+        AuthenticationService.login($scope.credentials).success(function () {
+            $location.path("/home");
+        });
+    };
 });
 
-app.controller("HomeController", function ($scope, AuthenticationService) {
+
+app.controller("HomeController", function ($scope, $location, AuthenticationService) {
     $scope.title = "Awesome Home";
     $scope.message = "Mouse Over these images to see a directive at work!";
 
     $scope.logout = function () {
-        AuthenticationService.logout();
+        AuthenticationService.logout().success(function () {
+            $location.path('/login');
+
+
+        });
     };
 });
+
 
 app.directive("showsMessageWhenHovered", function () {
     return {
